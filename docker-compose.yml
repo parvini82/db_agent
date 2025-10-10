@@ -41,13 +41,24 @@ services:
     container_name: db_agent_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@dbagent.local
+      PGADMIN_DEFAULT_EMAIL: parvinimohammadhosein@gmail.com
       PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
       - "5050:80"
     depends_on:
       - postgres
-
+  ollama:
+    image: ollama/ollama:latest
+    container_name: db_agent_ollama
+    restart: always
+    ports:
+      - "11434:11434"       # ← پورت API Ollama
+    volumes:
+      - /Users/work/olama:/root/.ollama  # برای ذخیره مدل‌ها
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
 volumes:
   postgres_data:
   qdrant_data:
+  ollama_data:
