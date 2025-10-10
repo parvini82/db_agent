@@ -62,7 +62,7 @@ async def chat_endpoint(request: ChatRequest):
         """
 
         #  Call the agent
-        df: pd.DataFrame = run_agent(request.message, db_schema)
+        df: pd.DataFrame = run_agent(request.message)
 
         # Convert result to JSON-safe format
         result = df.head(10).to_dict(orient="records")

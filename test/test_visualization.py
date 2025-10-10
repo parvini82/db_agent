@@ -14,7 +14,7 @@ Relations:
 """
 
 def test_visualize_category_distribution():
-    df = run_agent("Show the number of products per category.", schema)
+    df = run_agent("Show the number of products per category.")
     if not df.empty:
         plt.bar(df["category"], df["product_count"])
         plt.title("Products per Category (Test)")
@@ -24,7 +24,7 @@ def test_visualize_category_distribution():
         plt.show()
 
 def test_visualize_monthly_sales():
-    df = run_agent("Show total sales revenue per month in the last 6 months.", schema)
+    df = run_agent("Show total sales revenue per month in the last 6 months.")
     if not df.empty:
         plt.plot(df["month"], df["total_sales"], marker="o")
         plt.title("Monthly Sales Revenue (Test)")
