@@ -9,6 +9,11 @@ class SqlGuardian:
             .replace("sql:", "", 1)
             .strip("`").strip()
         )
+        # Remove common junk like ```sql, /* ... */, <s>, </s>, etc.
+        query = re.sub(r"```[\s\S]*?```", "", query)  # remove fenced code
+        query = re.sub(r"/\*.*?\*/", "", query)  # remove inline comments
+        query = re.sub(r"<[^>]+>", "", query)  # remove XML-style tags
+        query = query.strip()
         query = re.sub(r"<[^>]+>", "", query).strip()
         forbidden = [
             "UPDATE", "DELETE", "INSERT", "DROP", "ALTER",

@@ -1,43 +1,68 @@
 from sqlalchemy import text
-from core.db import engine
+from faker import Faker
+import random
+from database.connection import engine
 
 def seed_data():
+    fake = Faker()
+    categories = ["Electronics", "Grocery", "Footwear", "Clothing", "Office", "Home", "Sports"]
+
     with engine.begin() as conn:
         # 🧹 Clean existing tables
         conn.execute(text("TRUNCATE TABLE sales, purchases, products, suppliers RESTART IDENTITY CASCADE;"))
 
         # --- Seed products ---
-        conn.execute(text("""
-            INSERT INTO products (name, category, description) VALUES
-            ('Laptop', 'Electronics', 'High-performance laptop'),
-            ('Keyboard', 'Electronics', 'Mechanical keyboard'),
-            ('Coffee', 'Grocery', 'Arabica beans'),
-            ('Sneakers', 'Footwear', 'Running shoes');
-        """))
+        products = [
+            (fake.word().capitalize(), random.choice(categories), fake.sentence(nb_words=4))
+            for _ in range(20)
+        ]
+        conn.execute(
+            text(
+                "INSERT INTO products (name, category, description) VALUES " +
+                ",".join([f"('{p[0]}','{p[1]}','{p[2]}')" for p in products]) + ";"
+            )
+        )
 
         # --- Seed suppliers ---
-        conn.execute(text("""
-            INSERT INTO suppliers (name, city, address) VALUES
-            ('TechZone', 'Paris', '123 Tech St'),
-            ('FoodMart', 'Lyon', '77 Fresh Rd'),
-            ('RunFast', 'Nice', '11 Sport Ave');
-        """))
+        suppliers = [
+            (fake.company(), fake.city(), fake.address())
+            for _ in range(10)
+        ]
+        conn.execute(
+            text(
+                "INSERT INTO suppliers (name, city, address) VALUES " +
+                ",".join([f"('{s[0]}','{s[1]}','{s[2]}')" for s in suppliers]) + ";"
+            )
+        )
 
         # --- Seed purchases ---
-        conn.execute(text("""
-            INSERT INTO purchases (product_id, supplier_id, purchase_date, quantity, unit_cost) VALUES
-            (1, 1, CURRENT_DATE - interval '90 days', 50, 600),
-            (2, 1, CURRENT_DATE - interval '60 days', 100, 50),
-            (3, 2, CURRENT_DATE - interval '30 days', 200, 8),
-            (4, 3, CURRENT_DATE - interval '15 days', 60, 45);
-        """))
+        purchase_values = []
+        for _ in range(50):
+            purchase_values.append(
+                f"({random.randint(1, 20)}, {random.randint(1, 10)}, "
+                f"CURRENT_DATE - interval '{random.randint(10, 120)} days', "
+                f"{random.randint(10, 200)}, {round(random.uniform(5, 1000), 2)})"
+            )
+        conn.execute(
+            text(
+                "INSERT INTO purchases (product_id, supplier_id, purchase_date, quantity, unit_cost) VALUES "
+                + ",".join(purchase_values) + ";"
+            )
+        )
 
         # --- Seed sales ---
-        conn.execute(text("""
-            INSERT INTO sales (product_id, sale_date, quantity, unit_price) VALUES
-            (1, CURRENT_DATE - interval '3 months', 20, 900),
-            (2, CURRENT_DATE - interval '2 months', 40, 80),
-            (3, CURRENT_DATE - interval '1 month', 150, 12),
-            (4, CURRENT_DATE - interval '10 days', 25, 75);
-        """))
-    print("✅ Seed data inserted successfully.")
+        sale_values = []
+        for _ in range(100):
+            sale_values.append(
+                f"({random.randint(1, 20)}, "
+                f"CURRENT_DATE - interval '{random.randint(1, 90)} days', "
+                f"{random.randint(1, 100)}, {round(random.uniform(10, 2000), 2)})"
+            )
+        conn.execute(
+            text(
+                "INSERT INTO sales (product_id, sale_date, quantity, unit_price) VALUES "
+                + ",".join(sale_values) + ";"
+            )
+        )
+
+    print("✅ Randomized seed data inserted successfully.")

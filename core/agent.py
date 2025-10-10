@@ -6,7 +6,20 @@ import pandas as pd
 guardian = SqlGuardian()
 
 def run_agent(user_question: str, db_schema: str) -> pd.DataFrame:
-    response = chain.run({"schema": db_schema, "question": user_question})
+    response = chain.invoke({"schema": db_schema, "question": user_question})
+
+    if isinstance(response, dict):
+        if "text" in response:
+            response = response["text"]
+        elif "output_text" in response:
+            response = response["output_text"]
+        else:
+            response = str(response)
+    elif not isinstance(response, str):
+        response = str(response)
+
+    print("🧠 Raw LLM response:", response)  # Debug print
+
     safe_query = guardian.guard_select(response)
     df = execute_query(safe_query)
     print("\n✅ Generated & Executed Query:\n", safe_query)
